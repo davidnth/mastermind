@@ -26,9 +26,9 @@ class Player
         string = ''
         arr.each_with_index do |val, index|
             string << 'o' if val == code[index] 
-            string << 'x' if code.include? val unless val == code[index]
+            string << 'x'if code.include? val unless val == code[index] || string.count('x') == code.count(val)
         end 
-        p string.chars.sort.join 
+        p string.chars.sort.join
     end 
 
 
