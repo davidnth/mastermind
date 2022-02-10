@@ -34,6 +34,21 @@ class Player
 
 end 
 
+def guess
+    num = loop do
+        puts 'Enter a 4-digit code.'
+        num = gets.chomp
+
+        break num if valid_input?(num)
+    end 
+    num.to_i.digits.reverse
+end
+
+def valid_input?(string)
+    string.chars.all? {|char| char.between?('1','6')} && string.length == 4
+end 
+
+
 def code
     arr = Array.new(4).map {|k| k = rand(1..6)}
 end
