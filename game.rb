@@ -1,19 +1,12 @@
 require 'pry-byebug'
 require 'colorize'
-class Computer
-  attr_accessor :code
 
-  def initialize(generate_code)
-    @code = generate_code
-  end
-end
-
+# player
 class Player
   attr_accessor :tries, :arr
 
   def initialize
     @tries = 12
-  
   end
 
   # gets code from player, runs clue
@@ -62,6 +55,16 @@ class Player
   end
 end
 
+# computer class is used when the player chooses to be the creator
+class Computer < Player 
+  attr_accessor :candidates
+
+  def initialize
+    @candidates = (1111..6666).to_a.select {|num| num if num.digits.all? { |digit| digit.between?(1,6) }  }
+  end 
+
+end 
+
 def input
   loop do
     puts 'Enter a 4-digit code.'
@@ -78,41 +81,49 @@ def valid_input?(string)
 end
 
 def generate_code
-  Array.new(4).map { |k| k = rand(1..6) }
+  Array.new(4).map { rand(1..6) }
 end
 
-def game_over?(player, computer)
+def game_over?(player, secret_code)
   if player.tries.zero?
     puts 'You are out of guesses. Better luck next time!'
     return true
   end
-  if player.clue(computer.code) == 'oooo'
+  if player.clue(secret_code) == 'oooo'
     puts 'You have successfully cracked the code. Nice!'
     return true
   end
   false
 end
 
-def play_round(player, computer)
+def play_round(player, secret_code)
   loop do
     puts "You have #{player.tries} tries remaining."
-    player.guess(computer.code)
-    break if game_over?(player, computer)
+    player.guess(secret_code)
+    break if game_over?(player, secret_code)
   end
 end
 
-# come back to this later
-def creator_or_guesser
-  puts "Enter '1' to be the guesser or '2' to be the creator."
+# player chooses to be creator or guesser
+def creator?
+  puts 'Would you like to be the creator or the guesser?'
   loop do
-    selection = gets
-    break if %w[1 2].include? selection
+    selection = gets.chomp
+    return true if selection == 'creator'
+    return false if selection == 'guesser'
+
+    puts 'Invalid selection. Do you want to be the creator or the guesser?'
   end
 end
 
-computer = Computer.new(generate_code)
-p computer.code
-player = Player.new
+if creator? 
+    secret_code = input
+    p secret_code
+else 
+    secret_code = generate_code
 
-play_round(player, computer)
+    player = Player.new
+
+    play_round(player, secret_code)
+end 
 
