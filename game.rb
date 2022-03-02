@@ -3,7 +3,7 @@ require 'colorize'
 
 # player
 class Player
-  attr_accessor :tries, :arr
+  attr_accessor :tries, :arr, :current_feedback
 
   def initialize
     @tries = 12
@@ -57,10 +57,33 @@ end
 
 # computer class is used when the player chooses to be the creator
 class Computer < Player 
-  attr_accessor :candidates
+  attr_accessor :candidates, :arr
 
   def initialize
-    @candidates = (1111..6666).to_a.select {|num| num if num.digits.all? { |digit| digit.between?(1,6) }  }
+    super
+    @candidates = (1111..6666).to_a.select {|num| num if num.digits.all? { |digit| digit.between?(1,6) } }
+  end
+
+  def guess(secret_code)
+    @arr = next_guess
+    @tries -= 1
+    p "Feedback: #{@current_feedback = clue(secret_code)}"
+    @arr
+  end
+
+  # returns 1122 on first guess and the first candidate otherwise
+  def next_guess
+    @tries == 12 ? [1, 1, 2, 2] : @candidates[0].digits.reverse
+  end
+
+  def filter_candidates
+    @candidates = @candidates.select do |code|
+      string = ''
+      check_guess(code.digits.reverse, @arr, string)
+      code if string == current_feedback
+
+      # consider a @current_feedback variable
+    end 
   end 
 
 end 
@@ -116,9 +139,25 @@ def creator?
   end
 end
 
-if creator? 
+def computer_play(computer, secret_code)
+  turns = 0
+  loop do
+    p "Computer has #{computer.tries} tries remaining" unless computer.tries == 12
+    p "Computer guesses.. #{computer.guess(secret_code)}"
+    computer.filter_candidates
+    turns += 1
+    sleep(1.5)
+    break if computer.current_feedback == 'oooo'
+  end
+
+  p "Computer figured out your code in #{turns} turns." if computer.current_feedback == 'oooo'
+  
+end
+
+if creator?
     secret_code = input
-    p secret_code
+    computer = Computer.new
+    computer_play(computer, secret_code)
 else 
     secret_code = generate_code
 
