@@ -1,6 +1,3 @@
-require 'pry-byebug'
-require 'colorize'
-
 # player
 class Player
   attr_accessor :tries, :arr, :current_feedback
@@ -14,7 +11,6 @@ class Player
     @arr = input
     @tries -= 1
     p clue(secret_code)
-    @arr
   end
 
   # returns feedback out of order
@@ -61,13 +57,13 @@ class Computer < Player
 
   def initialize
     super
-    @candidates = (1111..6666).to_a.select {|num| num if num.digits.all? { |digit| digit.between?(1,6) } }
+    @candidates = (1111..6666).to_a.select { |num| num if num.digits.all? { |digit| digit.between?(1, 6) } }
   end
 
   def guess(secret_code)
     @arr = next_guess
     @tries -= 1
-    p "Feedback: #{@current_feedback = clue(secret_code)}"
+    @current_feedback = clue(secret_code)
     @arr
   end
 
@@ -81,12 +77,9 @@ class Computer < Player
       string = ''
       check_guess(code.digits.reverse, @arr, string)
       code if string == current_feedback
-
-      # consider a @current_feedback variable
-    end 
-  end 
-
-end 
+    end
+  end
+end
 
 def input
   loop do
@@ -142,27 +135,26 @@ end
 def computer_play(computer, secret_code)
   turns = 0
   loop do
-    p "Computer has #{computer.tries} tries remaining" unless computer.tries == 12
-    p "Computer guesses.. #{computer.guess(secret_code)}"
+    # puts "\nComputer has #{computer.tries} tries remaining" unless computer.tries == 12
+    puts "Computer guesses: #{computer.guess(secret_code)}", "Feedback: #{computer.current_feedback}\n"
+    puts "Computer has #{computer.tries} tries remaining.", "\n"
     computer.filter_candidates
-    turns += 1
-    sleep(1.5)
+    turns += 1 and sleep(1.5)
     break if computer.current_feedback == 'oooo'
   end
 
-  p "Computer figured out your code in #{turns} turns." if computer.current_feedback == 'oooo'
-  
+  puts "\nComputer figured out your code in #{turns} turns." if computer.current_feedback == 'oooo'
 end
 
 if creator?
-    secret_code = input
-    computer = Computer.new
-    computer_play(computer, secret_code)
-else 
-    secret_code = generate_code
+  secret_code = input
+  computer = Computer.new
+  puts "Your code: #{secret_code}", "\n"
+  computer_play(computer, secret_code)
+else
+  secret_code = generate_code
 
-    player = Player.new
+  player = Player.new
 
-    play_round(player, secret_code)
-end 
-
+  play_round(player, secret_code)
+end
